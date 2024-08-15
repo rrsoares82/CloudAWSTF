@@ -1,0 +1,31 @@
+#!/bin/bash
+
+apt update
+apt upgrade -y
+apt install 
+apt install postgresql-client-common
+apt install postgresql-client -y
+
+export PGPASSWORD="ABCD1234abcd#"
+
+cat << EOF > intialize_db.sql
+
+CREATE SEQUENCE public.seq_users_id
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+
+
+CREATE TABLE public."users" (
+	id bigint DEFAULT nextval('seq_users_id'::regclass) NOT NULL,
+	name varchar(250) NOT NULL,
+	CONSTRAINT user_pk PRIMARY KEY (id)
+);
+
+EOF
+
+psql -U postgres -h ${db_endpoint} -d postgres -f intialize_db.sql
