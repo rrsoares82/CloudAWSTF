@@ -12,6 +12,10 @@
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 5.62.0 |
 | <a name="provider_time"></a> [time](#provider\_time) | 0.12.0 |
 
+## Diagram
+
+![TF-Project-01.png](TF-Project-01.png)
+
 ## Modules
 
 No modules.
@@ -46,6 +50,9 @@ No modules.
 | [aws_s3_object.images](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
 | [aws_security_group.web-app-proj-001-sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_ssm_parameter.db-endpoint](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.db-name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.db-password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.db-user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_subnet.sn-priv-01-proj-001](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.sn-pub-01-proj-001](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.sn-pub-02-proj-001](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
@@ -58,9 +65,15 @@ No modules.
 
 ## Inputs
 
-No inputs.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_db-name"></a> [db-name](#input\_db-name) | n/a | `string` | `"postgres"` | no |
+| <a name="input_db-password"></a> [db-password](#input\_db-password) | n/a | `string` | `"ABCD1234abcd#"` | no |
+| <a name="input_db-user"></a> [db-user](#input\_db-user) | n/a | `string` | `"postgres"` | no |
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_instance_ip_addr"></a> [instance\_ip\_addr](#output\_instance\_ip\_addr) | The DNS named to access the application |
 <!-- END_TF_DOCS -->

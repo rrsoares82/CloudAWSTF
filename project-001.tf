@@ -160,6 +160,51 @@ resource "aws_db_subnet_group" "sbg-db-01-project-001-default" {
   }
 }
 
+variable "db-name" {
+  type = string
+  default = "postgres"
+}
+
+variable "db-user" {
+  type = string
+  default = "postgres"
+}
+
+variable "db-password" {
+  type = string
+  default = "ABCD1234abcd#"
+  sensitive = true
+}
+
+resource "aws_ssm_parameter" "db-name" {
+  depends_on = [aws_db_instance.db-01-project-001]
+  type       = "String"
+  name       = var.db-name
+  value      = element(split(":", aws_db_instance.db-01-project-001.endpoint), 0)
+  tags = {
+    Name = var.db-name
+  }
+}
+
+resource "aws_ssm_parameter" "db-user" {
+  depends_on = [aws_db_instance.db-01-project-001]
+  type       = "String"
+  name       = var.db-user
+  value      = element(split(":", aws_db_instance.db-01-project-001.endpoint), 0)
+  tags = {
+    Name = var.db-user
+  }
+}
+
+resource "aws_ssm_parameter" "db-password" {
+  depends_on = [aws_db_instance.db-01-project-001]
+  type       = "String"
+  name       = var.db-password
+  value      = element(split(":", aws_db_instance.db-01-project-001.endpoint), 0)
+  tags = {
+    Name = var.db-password
+  }
+}
 
 resource "aws_db_instance" "db-01-project-001" {
   depends_on = [aws_db_subnet_group.sbg-db-01-project-001-default]
@@ -169,8 +214,9 @@ resource "aws_db_instance" "db-01-project-001" {
   db_subnet_group_name         = "sbg-db-01-project-001-default"
   engine                       = "postgres"
   instance_class               = "db.t3.micro"
-  username                     = "postgres"
-  password                     = "ABCD1234abcd#"
+  db_name                      = var.db-name
+  username                     = var.db-user
+  password                     = var.db-password
   skip_final_snapshot          = true
   multi_az                     = false
   identifier                   = "db-01-project-001"
@@ -186,7 +232,7 @@ resource "aws_ssm_parameter" "db-endpoint" {
   name       = "db-endpoint"
   value      = element(split(":", aws_db_instance.db-01-project-001.endpoint), 0)
   tags = {
-    Name = "db-01-project-001"
+    Name = "db-endpoint"
   }
 }
 
@@ -340,4 +386,9 @@ resource "aws_autoscaling_group" "asg-web01-project-001" {
     id      = aws_launch_template.tmp-simple-web-app.id
     version = "$Latest"
   }
+}
+
+output "instance_ip_addr" {
+  value       = aws_lb.elb-01-project-001.dns_name
+  description = "The DNS named to access the application"
 }
