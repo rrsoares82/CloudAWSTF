@@ -57,6 +57,7 @@ No modules.
 | [aws_subnet.sn-pub-01-proj-001](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.sn-pub-02-proj-001](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.vpc-project-001](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
+| [aws_vpc_endpoint.ep-gtw-01-project-001](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
 | [aws_vpc_security_group_egress_rule.web-app-proj-001-all](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.web-app-proj-001-sg-8080](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.web-app-proj-001-sg-ssh](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
@@ -67,13 +68,14 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_db-name"></a> [db-name](#input\_db-name) | n/a | `string` | `"postgres"` | no |
-| <a name="input_db-password"></a> [db-password](#input\_db-password) | n/a | `string` | `"ABCD1234abcd#"` | no |
-| <a name="input_db-user"></a> [db-user](#input\_db-user) | n/a | `string` | `"postgres"` | no |
+| <a name="input_db-name"></a> [db-name](#input\_db-name) | Database name | `string` | `"postgres"` | no |
+| <a name="input_db-password"></a> [db-password](#input\_db-password) | Database password | `string` | `"ABCD1234abcd#"` | no |
+| <a name="input_db-user"></a> [db-user](#input\_db-user) | Database user | `string` | `"postgres"` | no |
+| <a name="input_zones"></a> [zones](#input\_zones) | n/a | `list(string)` | <pre>[<br>  "sa-east-1a",<br>  "sa-east-1c"<br>]</pre> | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_instance_ip_addr"></a> [instance\_ip\_addr](#output\_instance\_ip\_addr) | The DNS named to access the application |
+| <a name="output_lb_endpoint"></a> [lb\_endpoint](#output\_lb\_endpoint) | The DNS named to access the application |
 <!-- END_TF_DOCS -->
