@@ -19,6 +19,12 @@ provider "aws" {
   }
 }
 
+variable "zones" {
+  type    = list(string)
+  default = ["sa-east-1a", "sa-east-1c"]
+}
+
+
 resource "aws_vpc" "vpc-project-001" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
@@ -50,7 +56,7 @@ resource "aws_default_security_group" "default" {
 
 resource "aws_subnet" "sn-pub-01-proj-001" {
   vpc_id                  = aws_vpc.vpc-project-001.id
-  availability_zone       = "sa-east-1a"
+  availability_zone       = (var.zones[0])
   map_public_ip_on_launch = true
   cidr_block              = "10.0.0.0/24"
   tags = {
@@ -60,7 +66,7 @@ resource "aws_subnet" "sn-pub-01-proj-001" {
 
 resource "aws_subnet" "sn-pub-02-proj-001" {
   vpc_id                  = aws_vpc.vpc-project-001.id
-  availability_zone       = "sa-east-1b"
+  availability_zone       = (var.zones[1])
   map_public_ip_on_launch = true
   cidr_block              = "10.0.1.0/24"
   tags = {
@@ -69,8 +75,9 @@ resource "aws_subnet" "sn-pub-02-proj-001" {
 }
 
 resource "aws_subnet" "sn-priv-01-proj-001" {
-  vpc_id     = aws_vpc.vpc-project-001.id
-  cidr_block = "10.0.2.0/24"
+  vpc_id            = aws_vpc.vpc-project-001.id
+  availability_zone = (var.zones[0])
+  cidr_block        = "10.0.2.0/24"
   tags = {
     Name = "sn-priv-01-proj-001"
   }
@@ -136,6 +143,17 @@ resource "aws_route_table_association" "sn-priv-01-proj-001" {
   route_table_id = aws_route_table.rtb-priv-project-001.id
 }
 
+
+resource "aws_vpc_endpoint" "ep-gtw-01-project-001" {
+  vpc_id          = aws_vpc.vpc-project-001.id
+  service_name    = "com.amazonaws.sa-east-1.s3"
+  route_table_ids = [aws_route_table.rtb-priv-project-001.id, aws_route_table.rtb-pub-project-001.id]
+  tags = {
+    Name = "ep-gtw-01-project-001"
+  }
+}
+
+
 resource "aws_s3_bucket" "s3-project-001-static" {
   bucket        = "s3-project-001-static"
   force_destroy = true
@@ -161,48 +179,51 @@ resource "aws_db_subnet_group" "sbg-db-01-project-001-default" {
 }
 
 variable "db-name" {
-  type = string
-  default = "postgres"
+  type        = string
+  description = "Database name"
+  default     = "postgres"
 }
 
 variable "db-user" {
-  type = string
-  default = "postgres"
+  type        = string
+  description = "Database user"
+  default     = "postgres"
 }
 
 variable "db-password" {
-  type = string
-  default = "ABCD1234abcd#"
-  sensitive = true
+  type        = string
+  description = "Database password"
+  default     = "ABCD1234abcd#"
+  sensitive   = true
 }
 
 resource "aws_ssm_parameter" "db-name" {
   depends_on = [aws_db_instance.db-01-project-001]
   type       = "String"
-  name       = var.db-name
-  value      = element(split(":", aws_db_instance.db-01-project-001.endpoint), 0)
+  name       = "db-name"
+  value      = var.db-name
   tags = {
-    Name = var.db-name
+    Name = "db-name"
   }
 }
 
 resource "aws_ssm_parameter" "db-user" {
   depends_on = [aws_db_instance.db-01-project-001]
   type       = "String"
-  name       = var.db-user
-  value      = element(split(":", aws_db_instance.db-01-project-001.endpoint), 0)
+  name       = "db-user"
+  value      = var.db-user
   tags = {
-    Name = var.db-user
+    Name = "db-user"
   }
 }
 
 resource "aws_ssm_parameter" "db-password" {
   depends_on = [aws_db_instance.db-01-project-001]
   type       = "String"
-  name       = var.db-password
-  value      = element(split(":", aws_db_instance.db-01-project-001.endpoint), 0)
+  name       = "db-password"
+  value      = var.db-password
   tags = {
-    Name = var.db-password
+    Name = "db-password"
   }
 }
 
@@ -247,7 +268,7 @@ resource "aws_instance" "p-001-ec2-test-01" {
   depends_on = [aws_db_instance.db-01-project-001, aws_ssm_parameter.db-endpoint]
 
   ami           = "ami-080111c1449900431"
-  instance_type = "t3.micro"
+  instance_type = "t2.micro"
   subnet_id     = aws_subnet.sn-priv-01-proj-001.id
   key_name      = "std-dev-sa-east-1"
   user_data     = templatefile("user_data.tftpl", { db_endpoint = aws_ssm_parameter.db-endpoint.value })
@@ -323,8 +344,8 @@ resource "aws_iam_role_policy_attachment" "role-ec2-s3_ssm_attach" {
 
 resource "aws_launch_template" "tmp-simple-web-app" {
   name          = "tmp-simple-web-app"
-  image_id      = "ami-0c2752bc89edddb26"
-  instance_type = "t3.micro"
+  image_id      = "ami-08786c531813c9ab5"
+  instance_type = "t2.micro"
   key_name      = "std-dev-sa-east-1"
   iam_instance_profile {
     name = aws_iam_instance_profile.role-ec2-s3_profile.name
@@ -388,7 +409,7 @@ resource "aws_autoscaling_group" "asg-web01-project-001" {
   }
 }
 
-output "instance_ip_addr" {
+output "lb_endpoint" {
   value       = aws_lb.elb-01-project-001.dns_name
   description = "The DNS named to access the application"
 }
